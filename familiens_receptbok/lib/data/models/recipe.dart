@@ -14,6 +14,14 @@ class Recipe {
   String? instructions;
   String? imagePath;
 
+  @Index()
+  bool isFavorite = false;
+  
+  @Index()
+  double rating = 0.0; // 0-5 stars
+  
+  int ratingCount = 0; // Number of ratings given
+
   DateTime? createdAt;
   DateTime? updatedAt;
 

@@ -37,13 +37,28 @@ const RecipeSchema = CollectionSchema(
       name: r'instructions',
       type: IsarType.string,
     ),
-    r'title': PropertySchema(
+    r'isFavorite': PropertySchema(
       id: 4,
+      name: r'isFavorite',
+      type: IsarType.bool,
+    ),
+    r'rating': PropertySchema(
+      id: 5,
+      name: r'rating',
+      type: IsarType.double,
+    ),
+    r'ratingCount': PropertySchema(
+      id: 6,
+      name: r'ratingCount',
+      type: IsarType.long,
+    ),
+    r'title': PropertySchema(
+      id: 7,
       name: r'title',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 5,
+      id: 8,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -64,6 +79,32 @@ const RecipeSchema = CollectionSchema(
           name: r'title',
           type: IndexType.value,
           caseSensitive: true,
+        )
+      ],
+    ),
+    r'isFavorite': IndexSchema(
+      id: 5742774614603939776,
+      name: r'isFavorite',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'isFavorite',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'rating': IndexSchema(
+      id: 3934517271104932818,
+      name: r'rating',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'rating',
+          type: IndexType.value,
+          caseSensitive: false,
         )
       ],
     )
@@ -126,8 +167,11 @@ void _recipeSerialize(
   writer.writeString(offsets[1], object.imagePath);
   writer.writeString(offsets[2], object.ingredients);
   writer.writeString(offsets[3], object.instructions);
-  writer.writeString(offsets[4], object.title);
-  writer.writeDateTime(offsets[5], object.updatedAt);
+  writer.writeBool(offsets[4], object.isFavorite);
+  writer.writeDouble(offsets[5], object.rating);
+  writer.writeLong(offsets[6], object.ratingCount);
+  writer.writeString(offsets[7], object.title);
+  writer.writeDateTime(offsets[8], object.updatedAt);
 }
 
 Recipe _recipeDeserialize(
@@ -142,8 +186,11 @@ Recipe _recipeDeserialize(
   object.imagePath = reader.readStringOrNull(offsets[1]);
   object.ingredients = reader.readStringOrNull(offsets[2]);
   object.instructions = reader.readStringOrNull(offsets[3]);
-  object.title = reader.readStringOrNull(offsets[4]);
-  object.updatedAt = reader.readDateTimeOrNull(offsets[5]);
+  object.isFavorite = reader.readBool(offsets[4]);
+  object.rating = reader.readDouble(offsets[5]);
+  object.ratingCount = reader.readLong(offsets[6]);
+  object.title = reader.readStringOrNull(offsets[7]);
+  object.updatedAt = reader.readDateTimeOrNull(offsets[8]);
   return object;
 }
 
@@ -163,8 +210,14 @@ P _recipeDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 5:
+      return (reader.readDouble(offset)) as P;
+    case 6:
+      return (reader.readLong(offset)) as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -196,6 +249,22 @@ extension RecipeQueryWhereSort on QueryBuilder<Recipe, Recipe, QWhere> {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'title'),
+      );
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterWhere> anyIsFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'isFavorite'),
+      );
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterWhere> anyRating() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'rating'),
       );
     });
   }
@@ -419,6 +488,140 @@ extension RecipeQueryWhere on QueryBuilder<Recipe, Recipe, QWhereClause> {
               upper: [''],
             ));
       }
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterWhereClause> isFavoriteEqualTo(
+      bool isFavorite) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'isFavorite',
+        value: [isFavorite],
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterWhereClause> isFavoriteNotEqualTo(
+      bool isFavorite) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isFavorite',
+              lower: [],
+              upper: [isFavorite],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isFavorite',
+              lower: [isFavorite],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isFavorite',
+              lower: [isFavorite],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isFavorite',
+              lower: [],
+              upper: [isFavorite],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterWhereClause> ratingEqualTo(double rating) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'rating',
+        value: [rating],
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterWhereClause> ratingNotEqualTo(
+      double rating) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'rating',
+              lower: [],
+              upper: [rating],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'rating',
+              lower: [rating],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'rating',
+              lower: [rating],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'rating',
+              lower: [],
+              upper: [rating],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterWhereClause> ratingGreaterThan(
+    double rating, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'rating',
+        lower: [rating],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterWhereClause> ratingLessThan(
+    double rating, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'rating',
+        lower: [],
+        upper: [rating],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterWhereClause> ratingBetween(
+    double lowerRating,
+    double upperRating, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'rating',
+        lower: [lowerRating],
+        includeLower: includeLower,
+        upper: [upperRating],
+        includeUpper: includeUpper,
+      ));
     });
   }
 }
@@ -983,6 +1186,131 @@ extension RecipeQueryFilter on QueryBuilder<Recipe, Recipe, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Recipe, Recipe, QAfterFilterCondition> isFavoriteEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isFavorite',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterFilterCondition> ratingEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'rating',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterFilterCondition> ratingGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'rating',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterFilterCondition> ratingLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'rating',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterFilterCondition> ratingBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'rating',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterFilterCondition> ratingCountEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'ratingCount',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterFilterCondition> ratingCountGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'ratingCount',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterFilterCondition> ratingCountLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'ratingCount',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterFilterCondition> ratingCountBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'ratingCount',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Recipe, Recipe, QAfterFilterCondition> titleIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1309,6 +1637,42 @@ extension RecipeQuerySortBy on QueryBuilder<Recipe, Recipe, QSortBy> {
     });
   }
 
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> sortByIsFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isFavorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> sortByIsFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isFavorite', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> sortByRating() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'rating', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> sortByRatingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'rating', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> sortByRatingCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ratingCount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> sortByRatingCountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ratingCount', Sort.desc);
+    });
+  }
+
   QueryBuilder<Recipe, Recipe, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -1395,6 +1759,42 @@ extension RecipeQuerySortThenBy on QueryBuilder<Recipe, Recipe, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> thenByIsFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isFavorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> thenByIsFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isFavorite', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> thenByRating() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'rating', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> thenByRatingDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'rating', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> thenByRatingCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ratingCount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QAfterSortBy> thenByRatingCountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'ratingCount', Sort.desc);
+    });
+  }
+
   QueryBuilder<Recipe, Recipe, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -1448,6 +1848,24 @@ extension RecipeQueryWhereDistinct on QueryBuilder<Recipe, Recipe, QDistinct> {
     });
   }
 
+  QueryBuilder<Recipe, Recipe, QDistinct> distinctByIsFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isFavorite');
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QDistinct> distinctByRating() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'rating');
+    });
+  }
+
+  QueryBuilder<Recipe, Recipe, QDistinct> distinctByRatingCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'ratingCount');
+    });
+  }
+
   QueryBuilder<Recipe, Recipe, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1490,6 +1908,24 @@ extension RecipeQueryProperty on QueryBuilder<Recipe, Recipe, QQueryProperty> {
   QueryBuilder<Recipe, String?, QQueryOperations> instructionsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'instructions');
+    });
+  }
+
+  QueryBuilder<Recipe, bool, QQueryOperations> isFavoriteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isFavorite');
+    });
+  }
+
+  QueryBuilder<Recipe, double, QQueryOperations> ratingProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'rating');
+    });
+  }
+
+  QueryBuilder<Recipe, int, QQueryOperations> ratingCountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'ratingCount');
     });
   }
 

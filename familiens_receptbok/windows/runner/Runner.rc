@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example.verygoodcore.familiens-receptbok" "\0"
+            VALUE "CompanyName", "com.example.verygoodcore" "\0"
             VALUE "FileDescription", "familiens_receptbok" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "familiens_receptbok" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example.verygoodcore.familiens-receptbok. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.example.verygoodcore. All rights reserved." "\0"
             VALUE "OriginalFilename", "familiens_receptbok.exe" "\0"
-            VALUE "ProductName", "Familiens Receptbok" "\0"
+            VALUE "ProductName", "familiens_receptbok" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
